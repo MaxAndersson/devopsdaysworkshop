@@ -1,0 +1,20 @@
+version: '3'
+services:
+  frontend:
+    image: frontend
+    build: frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_SOME_ENV="some value"
+
+  backend:
+    image: backend
+    build: backend/
+    ports:
+      - "4000:4000"
+    environment:
+      - NEO4J_HOST=${NEO4J_HOST}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASS=${NEO4J_PASS}
+
