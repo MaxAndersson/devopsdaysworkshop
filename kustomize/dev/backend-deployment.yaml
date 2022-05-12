@@ -6,10 +6,7 @@ spec:
   template:
     spec:
       containers:
-        - image: backend
-          name: backend
-          ports:
-            - containerPort: 4000
+        - name: backend
           env:
             - name: NEO4J_HOST
               valueFrom:

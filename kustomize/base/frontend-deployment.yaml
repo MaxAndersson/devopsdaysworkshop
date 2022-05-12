@@ -24,7 +24,7 @@ spec:
         io.kompose.service: frontend
     spec:
       containers:
-        - image: frontend
+        - image: maxandersson/frontend 
           name: frontend
           ports:
             - containerPort: 80

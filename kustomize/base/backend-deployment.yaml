@@ -24,7 +24,7 @@ spec:
         io.kompose.service: backend
     spec:
       containers:
-        - image: backend
+        - image: maxandersson/backend
           name: backend
           ports:
             - containerPort: 4000
