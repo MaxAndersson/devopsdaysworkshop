@@ -4,6 +4,7 @@ kind: Kustomization
 bases:
 - ../base
 - ./neo4j/templates
+- ./grafana/templates
 
 resources:
 - ./prometheus/main.yaml
