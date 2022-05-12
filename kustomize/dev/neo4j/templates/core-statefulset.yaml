@@ -1,0 +1,125 @@
+---
+# Source: neo4j/templates/core-statefulset.yaml
+apiVersion: "apps/v1"
+kind: StatefulSet
+metadata:
+  name: "release-name-neo4j-core"
+  labels:
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/instance: "release-name"
+    helm.sh/chart: neo4j-4.4.5
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/component: core
+spec:
+  podManagementPolicy: Parallel
+  serviceName: release-name-neo4j
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: "release-name"
+      app.kubernetes.io/name: neo4j
+      app.kubernetes.io/component: core
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/managed-by: "Helm"
+        app.kubernetes.io/instance: "release-name"
+        helm.sh/chart: "neo4j-4.4.5"
+        app.kubernetes.io/name: neo4j
+        app.kubernetes.io/component: core
+    spec:
+      serviceAccountName: release-name-neo4j-sa
+      automountServiceAccountToken: true
+      # High value permits checkpointing on Neo4j shutdown.  See: https://neo4j.com/developer/kb/checkpointing-and-log-pruning-interactions/
+      terminationGracePeriodSeconds: 300
+      containers:
+      - name: release-name-neo4j
+        securityContext:
+                    {}
+        image: "neo4j:4.4.5-enterprise"
+        imagePullPolicy: "IfNotPresent"
+        envFrom:
+          - configMapRef:
+              name: release-name-neo4j-common-config
+          - configMapRef:
+              name: release-name-neo4j-core-config
+        env:
+          - name: NEO4J_SECRETS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: release-name-neo4j-secrets
+                key: neo4j-password
+        command:
+          - "/bin/bash"
+          - "-c"
+          - |
+            export core_idx=$(hostname | sed 's|.*-||')
+
+            # Processes key configuration elements and exports env vars we need.
+            . /helm-init/init.sh
+
+            echo "Starting Neo4j CORE $core_idx on $HOST"
+            exec /docker-entrypoint.sh "neo4j"
+        ports:
+        - containerPort: 5000
+          name: tcp-discovery
+        - containerPort: 7000
+          name: tcp-raft
+        - containerPort: 6000
+          name: tcp-tx
+        - containerPort: 7474
+          name: tcp-browser
+        - containerPort: 7687
+          name: tcp-bolt
+        - containerPort: 7688
+          name: tcp-boltrouting
+        - containerPort: 3637
+          name: tcp-jmx
+        volumeMounts:
+        - name: init-script
+          mountPath: /helm-init
+        - name: datadir
+          mountPath: "/data"
+        - name: plugins
+          mountPath: /plugins
+        startupProbe:
+          failureThreshold: 2000
+          periodSeconds: 25
+          tcpSocket:
+            port: 7687
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          tcpSocket:
+            port: 7687
+          timeoutSeconds: 2
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 300
+          periodSeconds: 10
+          tcpSocket:
+            port: 7687
+          timeoutSeconds: 2
+        resources:
+          {}
+      initContainers:
+      
+      securityContext:
+        {}
+      volumes:
+        - name: init-script
+          configMap:
+            name: "release-name-init-script"
+        - name: plugins
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: datadir
+        annotations:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: "1Ti"

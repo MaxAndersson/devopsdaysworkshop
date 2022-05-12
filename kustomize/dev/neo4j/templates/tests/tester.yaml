@@ -1,0 +1,53 @@
+---
+# Source: neo4j/templates/tests/tester.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "release-name-neo4j-service-test-39y2t"
+  labels:
+    helm.sh/chart: neo4j-4.4.5
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: "release-name"
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/component: tester
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": "before-hook-creation"
+spec:
+  containers:
+  - name: release-name-ui-test
+    image: gcr.io/neo4j-helm/tester:4.4.5
+    imagePullPolicy: IfNotPresent
+    env:
+      - name: NAME
+        value: "release-name"
+      - name: CORES
+        value: "3"
+      - name: READ_REPLICAS
+        value: "0"
+      - name: NAMESPACE
+        value: "default"
+      - name: PORT_HTTP
+        value: "7474"
+      - name: PORT_BOLT
+        value: "7687"
+    volumeMounts:
+      - name: secret-volume
+        mountPath: /secret
+        readOnly: true
+      - name: config-volume
+        mountPath: /tester
+        readOnly: true
+    command: ["/bin/bash"]
+    args: ["/tester/run.sh"]
+  restartPolicy: Never
+  volumes:
+    - name: secret-volume
+      secret:
+        secretName: release-name-neo4j-secrets
+        items:
+          - key: neo4j-password
+            path: neo4j-password
+    - name: config-volume
+      configMap:
+        name: "release-name-test-script"

@@ -1,0 +1,3 @@
+---
+# Source: neo4j/templates/readreplicas-statefulset.yaml
+# if not standalone mode

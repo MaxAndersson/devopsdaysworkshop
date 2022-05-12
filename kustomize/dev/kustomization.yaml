@@ -3,6 +3,7 @@ kind: Kustomization
 
 bases:
 - ../base
+- ./neo4j/templates
 
 configMapGenerator:
 - name: config

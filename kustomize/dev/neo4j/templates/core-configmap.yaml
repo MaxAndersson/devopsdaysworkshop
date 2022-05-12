@@ -1,0 +1,13 @@
+---
+# Source: neo4j/templates/core-configmap.yaml
+# This ConfigMap gets passed to all core cluster members to configure them.
+# Take note that some networking settings like internal hostname still get configured
+# when the pod starts, but most non-networking specific configs can be tailored here.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: release-name-neo4j-core-config
+data:
+  NEO4J_dbms_directories_logs: "/data/logs"
+  # https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.mode
+  NEO4J_dbms_mode: SINGLE

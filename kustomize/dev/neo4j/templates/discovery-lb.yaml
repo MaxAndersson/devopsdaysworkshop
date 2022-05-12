@@ -1,0 +1,275 @@
+---
+# Source: neo4j/templates/discovery-lb.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-release-name-neo4j-0
+  labels:
+    neo4j.com/coreindex: "0"
+    neo4j.com/cluster: release-name-neo4j
+    neo4j.com/role: CORE
+    neo4j.com/bolt: "false"
+    neo4j.com/http: "false"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/instance: "release-name"
+    helm.sh/chart: "neo4j-4.4.5"
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/component: core
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-discovery
+      port: 5000
+      targetPort: 5000
+      protocol: TCP
+    - name: tcp-transaction
+      port: 6000
+      targetPort: 6000
+      protocol: TCP
+    - name: tcp-raft
+      port: 7000
+      targetPort: 7000
+      protocol: TCP
+    - name: tcp-boltrouting
+      port: 7688
+      targetPort: 7688
+      protocol: TCP
+    - name: tcp-jmx
+      port: 3637
+      targetPort: 3637
+      protocol: TCP
+  selector:
+    statefulset.kubernetes.io/pod-name: "release-name-neo4j-core-0"
+---
+# Source: neo4j/templates/discovery-lb.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-release-name-neo4j-1
+  labels:
+    neo4j.com/coreindex: "1"
+    neo4j.com/cluster: release-name-neo4j
+    neo4j.com/role: CORE
+    neo4j.com/bolt: "false"
+    neo4j.com/http: "false"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/instance: "release-name"
+    helm.sh/chart: "neo4j-4.4.5"
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/component: core
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-discovery
+      port: 5000
+      targetPort: 5000
+      protocol: TCP
+    - name: tcp-transaction
+      port: 6000
+      targetPort: 6000
+      protocol: TCP
+    - name: tcp-raft
+      port: 7000
+      targetPort: 7000
+      protocol: TCP
+    - name: tcp-boltrouting
+      port: 7688
+      targetPort: 7688
+      protocol: TCP
+    - name: tcp-jmx
+      port: 3637
+      targetPort: 3637
+      protocol: TCP
+  selector:
+    statefulset.kubernetes.io/pod-name: "release-name-neo4j-core-1"
+---
+# Source: neo4j/templates/discovery-lb.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-release-name-neo4j-2
+  labels:
+    neo4j.com/coreindex: "2"
+    neo4j.com/cluster: release-name-neo4j
+    neo4j.com/role: CORE
+    neo4j.com/bolt: "false"
+    neo4j.com/http: "false"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/instance: "release-name"
+    helm.sh/chart: "neo4j-4.4.5"
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/component: core
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-discovery
+      port: 5000
+      targetPort: 5000
+      protocol: TCP
+    - name: tcp-transaction
+      port: 6000
+      targetPort: 6000
+      protocol: TCP
+    - name: tcp-raft
+      port: 7000
+      targetPort: 7000
+      protocol: TCP
+    - name: tcp-boltrouting
+      port: 7688
+      targetPort: 7688
+      protocol: TCP
+    - name: tcp-jmx
+      port: 3637
+      targetPort: 3637
+      protocol: TCP
+  selector:
+    statefulset.kubernetes.io/pod-name: "release-name-neo4j-core-2"
+---
+# Source: neo4j/templates/discovery-lb.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-release-name-neo4j-3
+  labels:
+    neo4j.com/coreindex: "3"
+    neo4j.com/cluster: release-name-neo4j
+    neo4j.com/role: CORE
+    neo4j.com/bolt: "false"
+    neo4j.com/http: "false"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/instance: "release-name"
+    helm.sh/chart: "neo4j-4.4.5"
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/component: core
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-discovery
+      port: 5000
+      targetPort: 5000
+      protocol: TCP
+    - name: tcp-transaction
+      port: 6000
+      targetPort: 6000
+      protocol: TCP
+    - name: tcp-raft
+      port: 7000
+      targetPort: 7000
+      protocol: TCP
+    - name: tcp-boltrouting
+      port: 7688
+      targetPort: 7688
+      protocol: TCP
+    - name: tcp-jmx
+      port: 3637
+      targetPort: 3637
+      protocol: TCP
+  selector:
+    statefulset.kubernetes.io/pod-name: "release-name-neo4j-core-3"
+---
+# Source: neo4j/templates/discovery-lb.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-release-name-neo4j-4
+  labels:
+    neo4j.com/coreindex: "4"
+    neo4j.com/cluster: release-name-neo4j
+    neo4j.com/role: CORE
+    neo4j.com/bolt: "false"
+    neo4j.com/http: "false"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/instance: "release-name"
+    helm.sh/chart: "neo4j-4.4.5"
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/component: core
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-discovery
+      port: 5000
+      targetPort: 5000
+      protocol: TCP
+    - name: tcp-transaction
+      port: 6000
+      targetPort: 6000
+      protocol: TCP
+    - name: tcp-raft
+      port: 7000
+      targetPort: 7000
+      protocol: TCP
+    - name: tcp-boltrouting
+      port: 7688
+      targetPort: 7688
+      protocol: TCP
+    - name: tcp-jmx
+      port: 3637
+      targetPort: 3637
+      protocol: TCP
+  selector:
+    statefulset.kubernetes.io/pod-name: "release-name-neo4j-core-4"
+---
+# Source: neo4j/templates/discovery-lb.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: discovery-release-name-neo4j-5
+  labels:
+    neo4j.com/coreindex: "5"
+    neo4j.com/cluster: release-name-neo4j
+    neo4j.com/role: CORE
+    neo4j.com/bolt: "false"
+    neo4j.com/http: "false"
+    app.kubernetes.io/managed-by: "Helm"
+    app.kubernetes.io/instance: "release-name"
+    helm.sh/chart: "neo4j-4.4.5"
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/component: core
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-discovery
+      port: 5000
+      targetPort: 5000
+      protocol: TCP
+    - name: tcp-transaction
+      port: 6000
+      targetPort: 6000
+      protocol: TCP
+    - name: tcp-raft
+      port: 7000
+      targetPort: 7000
+      protocol: TCP
+    - name: tcp-boltrouting
+      port: 7688
+      targetPort: 7688
+      protocol: TCP
+    - name: tcp-jmx
+      port: 3637
+      targetPort: 3637
+      protocol: TCP
+  selector:
+    statefulset.kubernetes.io/pod-name: "release-name-neo4j-core-5"
+---
+# Source: neo4j/templates/discovery-lb.yaml
+# This creates a discovery Service for each member in the core set, and ties to
+# the use of the Neo4j discovery type "K8S" with the configured selectors.
+# Done as many times as there are core machines, or just once if standalone.
+#
+# IMPORTANT - related to scaling, in order for the cluster to form correctly
+# there must be one of these per core node.  As a result, we intentionally create
+# too many of them in the causal cluster scenario to ensure that when pods scale
+# up, there are extra discovery addresses to cover them.
+##########################################################################

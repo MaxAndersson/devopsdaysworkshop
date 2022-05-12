@@ -1,0 +1,40 @@
+---
+# Source: neo4j/templates/common-configmap.yaml
+# This ConfigMap gets passed to ALL CORE AND READ REPLICA cluster members to configure them.
+# It contains the truly common things that are configuration wide.  The core and replica set
+# each have a separate configmap for those concerns.
+#
+# Here we translate a lot of user settings & preferences into env vars that get passed
+# to the Neo4j docker container.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: release-name-neo4j-common-config
+data:
+  NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+  NUMBER_OF_CORES: "3"
+  AUTH_ENABLED: "true"
+  NEO4J_dbms_allow__upgrade: "true"
+  # Enable listening for backups; default port 6362
+  NEO4J_dbms_backup_enabled: "true"
+  NEO4J_dbms_backup_listen__address: "0.0.0.0:6362"
+  NEO4J_dbms_default__database: "neo4j"
+  NEO4J_dbms_routing_enabled: "true"
+  NEO4J_dbms_routing_default__router: "SERVER"
+  NEO4J_dbms_routing_client__side_enforce__for__domains: "*.cluster.local"
+  NEO4J_dbms_routing_listen__address: 0.0.0.0:7688
+  NEO4J_dbms_connector_bolt_connection__keep__alive__for__requests: "ALL"
+  NEO4J_dbms_connector_bolt_listen__address: 0.0.0.0:7687
+  NEO4J_dbms_connector_http_listen__address: 0.0.0.0:7474
+  NEO4J_dbms_connector_https_listen__address: 0.0.0.0:7473
+  NEO4J_dbms_jvm_additional: "-XX:+ExitOnOutOfMemoryError"
+  NEO4J_metrics_graphite_enabled: "false"
+  NEO4J_metrics_graphite_server: "localhost:2003"
+  NEO4J_metrics_graphite_interval: "3s"
+  NEO4J_metrics_prometheus_enabled: "false"
+  NEO4J_metrics_prometheus_endpoint: "localhost:2004"
+  NEO4J_metrics_csv_enabled: "true"
+  NEO4J_metrics_csv_interval: "3s"
+  NEO4J_metrics_jmx_enabled: "true"
+  NEO4JLABS_PLUGINS: "[\"apoc\"]"
+  NEO4J_apoc_import_file_use__neo4j__config: "true"

@@ -1,0 +1,158 @@
+---
+# Source: neo4j/templates/tests/test-script.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "release-name-test-script"
+  labels:
+    helm.sh/chart: neo4j-4.4.5
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/instance: "release-name"
+    app.kubernetes.io/name: neo4j
+    app.kubernetes.io/component: tester
+  annotations:
+    "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded"
+data:
+  run.sh: |-
+    export PATH=/usr/bin:$PATH
+    export host="release-name-neo4j.$NAMESPACE.svc.cluster.local"
+    export replica_host="release-name-neo4j.$NAMESPACE.svc.cluster.local"
+    echo "HOST $host"
+    # This endpoint proves availability of the overall service
+    export endpoint="http://$host:$PORT_HTTP"
+    echo "ENDPOINT $endpoint"
+    # Mounted secret
+    export NEO4J_SECRETS_PASSWORD=$(cat /secret/neo4j-password)
+    export auth="neo4j:${NEO4J_SECRETS_PASSWORD}"
+    echo "AUTH $auth"
+    echo "CORES $CORES"
+    echo "RRs $READ_REPLICAS"
+
+    # When test resources are deployed cluster hasn't had a chance to form yet.
+    # This polls in a loop waiting for cluster to become available, and gives up/fails
+    # tests if it doesn't work within attempts.
+    attempt=0
+    attempts=5
+
+    while true; do
+      attempt=$[$attempt + 1]
+      /usr/bin/curl -s -I $endpoint/ | grep "200 OK"
+      if [ $? -eq 0 ] ; then
+        echo "✔️ Neo4j is up at attempt $attempt; HTTP port $PORT_HTTP"
+        break
+      fi
+
+      if [ $attempt -ge "$attempts" ]; then
+        echo "❌ REST API seems not to be coming up, giving up after $attempts attempts"
+        exit 1
+      fi
+
+      echo "Sleeping; not up yet after $attempt attempts"
+      sleep 5
+    done
+
+    # Pass index ID to get hostname for that pod.
+    function core_hostname {
+      # Example: a-neo4j-core-0.a-neo4j.default.svc.cluster.local
+      echo "release-name-neo4j-core-$1.release-name-neo4j.$NAMESPACE.svc.cluster.local"
+    }
+
+    function replica_hostname {      
+      echo "release-name-neo4j-replica-$1.release-name-neo4j-replica.default.svc.cluster.local"
+    }
+
+    test_index=0
+
+    function succeed {
+      echo "✔️  Test $test_index: $1"
+      test_index=$[$test_index + 1]
+    }
+
+    function fail {
+      echo "❌ Test $test_index: $1"
+      echo "Additional information: " "$2"
+      exit 1
+    }
+
+    function cypher {
+      # Use routing driver by default, send query wherever.
+      DEFAULT_ENDPOINT="neo4j://$host:$PORT_BOLT"
+
+      # If caller specified, use a specific endpoint to route a query to just one node.
+      ENDPOINT=${2:-$DEFAULT_ENDPOINT}
+
+      echo "$1" | /usr/bin/cypher-shell -u neo4j -a "$ENDPOINT" -p "$NEO4J_SECRETS_PASSWORD"
+    }
+
+    function runtest {
+      # Use routing driver by default, send query wherever.
+      DEFAULT_ENDPOINT="neo4j://$host:$PORT_BOLT"
+
+      # If caller specified, use a specific endpoint to route a query to just one node.
+      ENDPOINT=${3:-$DEFAULT_ENDPOINT}
+
+      echo "Running $1 against $ENDPOINT"
+      output=$(cypher "$2" "$3")
+
+      if [ $? -eq 0 ] ; then  
+        succeed "$1"
+      else
+        echo "Last output -- $output"
+        fail "$1" "$output"
+      fi
+    }
+
+    function check_secret_config_test {
+       ENDPOINT=$1
+       getconfig="call dbms.listConfig() yield name, value where name='dbms.transaction.concurrent.maximum' return value;"
+       res=$(cypher "$getconfig" $ENDPOINT)
+
+       echo $res | grep '"100"'
+       if [ $? -eq 0 ] ; then
+         succeed "$test"
+       else
+         fail "$test" "Expected it to be set to 0 - Output of config was $res"
+       fi
+    }
+
+    # At this point the service endpoint proves that at least one host is up.
+    # Provide just a bit more time for all of them to finish coming up because we'll
+    # be testing them individually.
+    echo "Waiting for formation to finish"
+    attempt=0
+    attempts=100
+    while true; do
+      attempt=$[$attempt + 1]
+      cypher "RETURN 1;"
+      if [ $? -eq 0 ] ; then
+        echo "✔️ Neo4j BOLT is up at attempt $attempt; BOLT port $PORT_BOLT"
+        break
+      fi
+
+      if [ $attempt -ge "$attempts" ]; then 
+        echo "❌ BOLT API seems not to be coming up, giving up after $attempts attempts"
+        exit 1
+      fi
+
+      echo "Sleeping; bolt not up yet after $attempt attempts"
+      sleep 5
+    done
+
+    echo "All pre-requisites met, beginning main testing"
+
+    echo "Basic topology upfront"
+    cypher "CALL dbms.cluster.overview();"
+
+    runtest "Bolt is available, port $PORT_BOLT"               "RETURN 'yes';"
+    runtest "Basic read queries"                               "MATCH (n) RETURN COUNT(n);"
+    runtest "Cluster accepts writes"                           'CREATE (t:TestNode) RETURN count(t);'
+
+    # Clustering tests... # If database in clustered mode
+
+    # Test for data replication.
+    runtest "Sample canary write" 'CREATE (c:Canary) RETURN count(c);'
+    echo "Sleeping a few seconds to permit replication"
+    sleep 5
+
+    echo "All good; testing completed"
+    exit 0
