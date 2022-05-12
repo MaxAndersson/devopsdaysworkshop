@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  template:
+    spec:
+      containers:
+        - image: backend
+          name: backend
+          ports:
+            - containerPort: 4000
+          env:
+            - name: NEO4J_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: NEO4J_HOST
+            - name: NEO4J_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: NEO4J_USER
+            - name: NEO4J_PASS
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: NEO4J_PASS
