@@ -5,6 +5,9 @@ bases:
 - ../base
 - ./neo4j/templates
 
+resources:
+- ./prometheus/main.yaml
+
 configMapGenerator:
 - name: config
   env: .env.dev
